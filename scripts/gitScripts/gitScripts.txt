@@ -1,0 +1,7 @@
+git init
+git add .
+git remote remove origin
+git remote add origin https://cc-design@dev.azure.com/cc-design/Alstom%20Azure%20Costing/_git/Alstom%20Azure%20Costing
+git branch -M production
+git push -uf origin production
+c2qltiny2ypf7lkipwemo23t3jee6zzzaxcmtall2gf4vxqzi7oa

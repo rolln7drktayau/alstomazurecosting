@@ -1,0 +1,7 @@
+This document specifies the App base and how components communicate.
+
+
+WebApp : Azure WebApp
+    -
+Server : Azure Server
+    - 

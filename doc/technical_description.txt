@@ -1,0 +1,24 @@
+This document specifies what the APP gets and manipulates the data.
+
+Protocols :
+    - Basic HTTP
+    - LTS : No
+
+Editor and modules : 
+    - VsCode
+    - Azure Integration for VsCode (For Azure interface communication)
+    - Sql Integration for VsCode (For Azure Server Database Communication and dsiplay)
+    - Github for the CI/CD (need to move on Alstom common GitLab)
+
+Languages : 
+    - Server : 
+        - PHP : version 7 and above
+        - SQL (MySql) : Lastest version, for the Database
+
+    - Application :
+        - JavaScript : (strict usage) and JSON usage
+        - Python : version 3 and above
+
+    - Client / Interface :
+        - HTML5 : UTF-8 Formatted
+        - CSS3 : For styles

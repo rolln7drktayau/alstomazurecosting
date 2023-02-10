@@ -1,0 +1,13 @@
+This document specifies what the APP does.
+
+Name : ALSTOM AZURE COSTING CALCULATOR
+Description : It help architects to evaluate the price of a virtual machine and its components.
+Functions :
+    - Select compute options
+    - Select disk options
+    - Add another disks
+    - Export in PDF
+    - Export in Excel (Soon)
+    - Add another package of compute and disks
+    - Display each blocs (compute and managed disks) related prices (with dxc charges and without dxc charges)
+    - Display dxc total charges, azure total charges, licenses and total price
