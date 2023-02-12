@@ -9,15 +9,15 @@
 function bdd_access()
 {
     $bdd = null;
-    $dsn = 'mysql:host=localhost;dbname=alstom_costing_calculator;charset=utf8';
-    $user = 'root';
-    $password = 'Admin_PMA_33';
-    $pdo_options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION);
-
-    // $dsn = 'mysql:host=rolandtest3-server.mysql.database.azure.com;dbname=alstom_costing_calculator;charset=utf8';
-    // $user = 'jvdwzkzpuz';
-    // $password = 'HNYO434SB660244Z$';
+    // $dsn = 'mysql:host=localhost;dbname=alstom_costing_calculator;charset=utf8';
+    // $user = 'root';
+    // $password = 'Admin_PMA_33';
     // $pdo_options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION);
+
+    $dsn = 'mysql:host=rolandtest3-server.mysql.database.azure.com;dbname=alstom_costing_calculator;charset=utf8';
+    $user = 'jvdwzkzpuz';
+    $password = 'HNYO434SB660244Z$';
+    $pdo_options = array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION);
 
     try {
         //On se connecte à MySQL
