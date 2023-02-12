@@ -7,13 +7,32 @@ class LinkedSelect {
      */
     constructor($select) {
         this.$select = $select;
-        this.onChange = this.onChange.bind(this)
-        this.$target = document.querySelector(this.$select.dataset.target)
-        this.$placeholder = this.$target.firstElementChild
-        // this.onChange = debounce(this.onChange.bind(this), 500)
-        this.$loader = null
-        this.cache = {}
-        this.$select.addEventListener('change', this.onChange)
+        this.onChange = this.onChange.bind(this);
+        this.$parent = this.$select.parentElement.parentElement;
+        // this.$target = document.querySelector(this.$select.dataset.target);
+        // this.$select.dataset.target = "#"+$(this.$select.dataset.target).closest('select').attr('id');
+        
+        this.$target = document.querySelector(this.$select.dataset.target);
+        // console.log($(this.$select).first().next().css("border", "5px dashed green"));
+        // console.log(document.querySelector(this.$select));
+
+        try {
+            this.$placeholder = this.$target.firstElementChild;
+            // this.$target = $(this.$select).parents(".main")[0].querySelector('#'+this.$target.id);
+            // console.log(this.$target);
+            // console.log($(this.$select).parents(".main")[0].querySelector('#'+this.$target.id));
+            // this.$target = $(this.$select).parents(".main")[0].querySelector('#' + this.$target.id);
+            // console.log(this.$select.parentElement.parentElement.querySelector('#'+this.$target.id));
+            // this.$placeholder = this.$target[0].innerHTML;
+            // this.$placeholder = "-- DEFAULT --"
+            // console.log(this.$target[0].innerHTML);
+            // this.onChange = debounce(this.onChange.bind(this), 500)
+            this.$loader = null
+            this.cache = {}
+            this.$select.addEventListener('change', this.onChange)
+        } catch (error) {
+            console.log("Not Initialized");
+        }
     }
 
     /**
@@ -27,7 +46,8 @@ class LinkedSelect {
         this.loadOptions(e.target.value, (options) => {
             this.$target.innerHTML = options
             this.$target.insertBefore(this.$placeholder, this.$target.firstChild)
-            this.$target.selectedIndex = 0
+            // this.$target.insertBefore(this.$placeholder, this.$target[0].innerHTML);
+            // this.$target.selectedIndex = 0
             // this.$target.style.display = hide
         })
     }
@@ -80,8 +100,7 @@ class LinkedSelect {
 
 }
 
-
-let $selects = document.querySelectorAll('.linked-select')
+let $selects = document.querySelectorAll('.linked-select');
 $selects.forEach(function ($select) {
-    new LinkedSelect($select)
+    new LinkedSelect($select);
 })
