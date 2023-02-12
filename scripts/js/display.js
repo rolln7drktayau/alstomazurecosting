@@ -305,7 +305,6 @@ function setUptime() {
     if ($('.Subscription-Select').val().includes("Pay")) {
         // let a = $('.Virtual-Machine-Select').val().split(' | ')[4].split(' ')[0];
         let a = $('.Virtual-Machine-Select').val().split(' | ')[4].split(' ')[0];
-
         let b = $('.Virtual-Machine-Select').val().split(' | ')[1];
 
         instancePrice = (+b) / (+a);

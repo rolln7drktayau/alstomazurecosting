@@ -9,12 +9,11 @@ include "functions.php";
 
 $pdo = bdd_access();
 global $currency;
-// $currency = devisesImport();
+$currency = devisesImport();
 $id = 'accId';
 
 $winLic = "1.25";
 $linLic = "2";
-$dateFilter = date("Y") . date("m");
 
 $currencyCode = "currencyCode";
 $tierMinimumUnits = "tierMinimumUnits";
@@ -39,7 +38,6 @@ $isPrimaryMeterRegion = "isPrimaryMeterRegion";
 $armSkuName = "armSkuName";
 $meterName = "meterName";
 $offerId = "offerId";
-$billingPeriodId = "billingPeriodId";
 $payg = "Pay As You Go";
 
 
@@ -77,18 +75,8 @@ function getCoreNum($vm)
     return $int;
 }
 
-function purify($elm)
-{
-    if (count(explode(" ", $elm)) > 1) {
-        list($pref, $suff) = explode(" ", $elm);
-        $elm = $pref;
-    }
-    return $elm;
-}
-
 function diskHeight($elm)
 {
-    $elm = purify($elm);
     $nbr = (int) filter_var($elm, FILTER_SANITIZE_NUMBER_INT);
     switch ($nbr) {
         case '1':
@@ -147,7 +135,10 @@ if (!empty($_GET['field'])) {
             $table = 'atRegions';
 
             // Request os from database
-            $operatingSystem = $pdo->prepare("SELECT * FROM osSoftware");
+            $operatingSystem = $pdo->prepare(
+                "SELECT * 
+                                              FROM osSoftware"
+            );
             $operatingSystem->execute();
             $items = $operatingSystem->fetchAll();
 
@@ -203,73 +194,105 @@ if (!empty($_GET['field'])) {
             $os = $_GET['os'];
             $subtype = $_GET['subs'];
             $serie = $_GET['selection'];
-            // str_replace(" ","%",$serie);
             $serie = "Virtual Machines " . $serie;
 
             list($op, $sub) = explode(" | ", $subtype);
             $operator = (float) $op;
             $subType = $sub;
 
-            // $reg = $region . " 2";
+            $reg = $region . " 2";
 
             if (!strcmp($subType, $payg)) {
-                $table = 'eadata';
-                if (!strcmp($os, "Windows")) {
-                    $instances = $pdo->prepare(
-                    "SELECT DISTINCT *, SUBSTRING_INDEX(SUBSTRING_INDEX($meterName, ' - ', 2), ' - ', -1)
-                    AS Instances
-                    FROM $table 
-                    WHERE $meterName LIKE '%Virtual Machines%'
-                    AND $meterName LIKE :location 
-                    AND $meterName LIKE :os
-                    AND $meterName LIKE :serie
-                    AND $offerId NOT LIKE '%MS-AZR-0148P%'
-                    AND $billingPeriodId LIKE :dateFilter
-                    AND $meterName NOT LIKE 'Dev%' 
-                    AND $meterName NOT LIKE '%Low%' 
-                    AND $meterName NOT LIKE '%Spot%' 
-                    AND $meterName NOT LIKE '%Basic%'
-                    AND $meterName NOT LIKE '%Expired%' 
-                    AND $meterName NOT LIKE '%Promo%'
-                    ORDER BY Instances ASC"
-                    );
-                    $instances->bindValue('location', '%' . $region);
-                    $instances->bindValue('os', '%' . $os . '%');
-                    $instances->bindValue('serie', '%' . $serie . '%');
-                    $instances->bindValue('dateFilter', '%' . $dateFilter . '%');
-                } else {
-                    $instances = $pdo->prepare(
-                        "SELECT DISTINCT *, SUBSTRING_INDEX(SUBSTRING_INDEX($meterName, ' - ', 2), ' - ', -1)
-                    AS Instances
-                    FROM $table 
-                    WHERE $meterName LIKE '%Virtual Machines%'
-                    AND $meterName LIKE :location 
-                    AND $meterName NOT LIKE :os
-                    AND $meterName LIKE :serie
-                    AND $offerId NOT LIKE '%MS-AZR-0148P%'
-                    AND $meterName NOT LIKE 'Dev%' 
-                    AND $meterName NOT LIKE '%Low%' 
-                    AND $meterName NOT LIKE '%Spot%' 
-                    AND $meterName NOT LIKE '%Basic%'
-                    AND $meterName NOT LIKE '%Expired%' 
-                    AND $meterName NOT LIKE '%Promo%'
-                    ORDER BY Instances ASC"
-                    );
-                    $instances->bindValue('os', '%' . $os . '%');
-                    $instances->bindValue('location', '%' . $region);
-                    $instances->bindValue('serie', '%' . $serie . '%');
-                }
 
-                $instances->execute();
-                $items = $instances->fetchAll();
-                // On renvoie les données au format JSON en choisissant des clefs spécifiques
-                header('Content-Type: application/json');
-                echo json_encode(array_map(function ($item) {
-                    return [
-                        'label' => $item['Instances'],
-                        'value' => $item['id'] . ' | ' . $item['unitPrice'] . ' | ' . getCoreNum($item['Instances']) . ' | ' . $item['Instances'] . ' | ' .  numberExtraction($item['unitOfMeasure'])
-                    ];
-                }, $items));
+                if (!strcmp($os, "Windows")) {
+                    $table = 'eadata';
+                    $instances = $pdo->prepare("SELECT DISTINCT *, SUBSTRING_INDEX(SUBSTRING_INDEX($meterName, ' - ', 2), ' - ', -1)
+                                        AS Instances
+                                        FROM $table 
+                                        WHERE $meterName
+                                        LIKE '%Virtual Machines%'
+                                        AND $meterName
+                                        LIKE :location 
+                                        AND $meterName
+                                        NOT LIKE :os
+                                        AND $meterName
+                                        LIKE :serie
+                                        AND meterName
+                                        NOT LIKE '%ADHType%'
+                                        AND $meterName
+                                        NOT LIKE 'Dev%' 
+                                        AND $meterName
+                                        NOT LIKE '%Low%' 
+                                        AND $meterName
+                                        NOT LIKE '%Spot%' 
+                                        AND $meterName 
+                                        NOT LIKE '%Basic%'
+                                        AND $meterName 
+                                        NOT LIKE '%Ex%' 
+                                        AND $meterName 
+                                        NOT LIKE '%Promo%' 
+                                        AND $offerId 
+                                        NOT LIKE '%MS-AZR-0148P%'
+                                        ORDER BY Instances ASC");
+                    $instances->bindValue('os', '%' . $os . '%');
+                    $instances->bindValue('location', '%' . $region . '%');
+                    $instances->bindValue('serie', '%' . $serie . '%');
+                    $instances->execute();
+
+
+                    $items = $instances->fetchAll();
+                    // On renvoie les données au format JSON en choisissant des clefs spécifiques
+                    header('Content-Type: application/json');
+                    echo json_encode(array_map(function ($item) {
+                        return [
+                            'label' => $item['Instances'],
+                            'value' => $item['id'] . ' | ' . $item['unitPrice'] . ' | ' . getCoreNum($item['Instances']) . ' | ' . $item['Instances'] . ' | ' .  numberExtraction($item['unitOfMeasure'])
+                        ];
+                    }, $items));
+                } else {
+                    $table = 'eadata';
+                    $instances = $pdo->prepare("SELECT DISTINCT *, SUBSTRING_INDEX(SUBSTRING_INDEX($meterName, ' - ', 2), ' - ', -1)
+                                        AS Instances
+                                        FROM $table 
+                                        WHERE $meterName
+                                        LIKE '%Virtual Machines%'
+                                        AND $meterName
+                                        LIKE :location 
+                                        AND $meterName
+                                        NOT LIKE :os
+                                        AND $meterName
+                                        LIKE :serie
+                                        AND $meterName
+                                        NOT LIKE 'Dev%' 
+                                        AND $meterName
+                                        NOT LIKE '%Low%' 
+                                        AND $meterName
+                                        NOT LIKE '%Spot%' 
+                                        AND $meterName 
+                                        NOT LIKE '%Basic%'
+                                        AND $meterName 
+                                        NOT LIKE '%Ex%' 
+                                        AND $meterName 
+                                        NOT LIKE '%Promo%' 
+                                        AND $offerId 
+                                        NOT LIKE '%MS-AZR-0148P%'
+                                        ORDER BY Instances ASC");
+                    $instances->bindValue('os', '%' . $os . '%');
+                    $instances->bindValue('location', '%' . $region . '%');
+                    $instances->bindValue('serie', '%' . $serie . '%');
+                    $instances->execute();
+
+
+                    $items = $instances->fetchAll();
+                    // On renvoie les données au format JSON en choisissant des clefs spécifiques
+                    header('Content-Type: application/json');
+                    echo json_encode(array_map(function ($item) {
+                        return [
+                            'label' => $item['Instances'],
+                            'value' => $item['id'] . ' | ' . $item['unitPrice'] . ' | ' . getCoreNum($item['Instances']) . ' | ' . $item['Instances'] . ' | ' .  numberExtraction($item['unitOfMeasure'])
+                        ];
+                    }, $items));
+                }
             } else {
                 // include "fetcher.php";
                 // $url = "https://prices.azure.com/api/retail/prices?$filter=priceType%20eq%20%27Reservation%27%20and%20serviceName%20eq%20%27Virtual%20Machines%27";
@@ -277,14 +300,22 @@ if (!empty($_GET['field'])) {
                 $table = 'rezdata';
                 $instances = $pdo->prepare("SELECT DISTINCT * 
                                             FROM $table 
-                                            WHERE $productName LIKE '%Virtual Machines%'
-                                            AND $location LIKE :location 
-                                            AND $productName LIKE :serie 
-                                            AND $reservationTerm LIKE :subType
-                                            AND $type LIKE 'Dev%' 
-                                            AND $skuName LIKE '%Low%' 
-                                            AND $skuName LIKE '%Spot%' 
-                                            AND $productName LIKE '%Basic%'  
+                                            WHERE $productName 
+                                            LIKE '%Virtual Machines%'
+                                            AND $location 
+                                            LIKE :location 
+                                            AND $productName 
+                                            LIKE :serie 
+                                            AND $reservationTerm
+                                            LIKE :subType
+                                            AND $type 
+                                            NOT LIKE 'Dev%' 
+                                            AND $skuName 
+                                            NOT LIKE '%Low%' 
+                                            AND $skuName 
+                                            NOT LIKE '%Spot%' 
+                                            AND $productName
+                                            NOT LIKE '%Basic%'  
                                             ORDER BY $skuName ASC");
                 // $instances->bindValue('os', '%' . $os . '%');
                 $instances->bindValue('location', '%' . $region);
@@ -371,13 +402,12 @@ if (!empty($_GET['field'])) {
             $uptime = $_GET['uptime'];
             $environment = $_GET['selection'];
 
-            list($a, $b, $c, $d, $e) = explode(" | ", $instances);
 
             // CATEGORY dxc md
             $category = $pdo->prepare("SELECT per FROM dxcNcCategory WHERE id LIKE '%2%'");
             $category->execute();
 
-            if (strpos($d, 's')) {
+            if (strpos($instances, 's')) {
                 $diskType = $pdo->prepare("SELECT * FROM diskType");
                 $diskType->execute();
             } else {
@@ -433,31 +463,75 @@ if (!empty($_GET['field'])) {
             $disktype = $_GET['type'];
             $redundancy = $_GET['selection'];
 
-            $table = 'eadata';
-
-            $disk = $pdo->prepare("SELECT DISTINCT *, SUBSTRING_INDEX(SUBSTRING_INDEX($meterName, ' - ', 2), ' - ', -1) 
+            if (!strcmp($redundancy, "LRS")) {
+                $disk = $pdo->prepare("SELECT *, SUBSTRING_INDEX(SUBSTRING_INDEX($Service, ' - ', 2), ' - ', -1) 
                         AS Disks 
-                        FROM $table
-                        WHERE $meterName LIKE :redundancy 
-                        AND $meterName LIKE :location 
-                        AND $meterName LIKE '%Managed Disks%' 
-                        AND $meterName LIKE :disktype 
-                        AND $billingPeriodId LIKE :dateFilter
-                        AND $offerId NOT LIKE '%MS-AZR-0148P%'
-                        AND $meterName NOT LIKE '%Dev%' 
-                        AND $meterName NOT LIKE '%Promo%'
-                        AND $meterName NOT LIKE '%Operations%'  
-                        AND $meterName NOT LIKE '%Basic%'  
-                        AND $meterName NOT LIKE '%Snapshots%' 
-                        AND $meterName NOT LIKE '%Mounts%'
-                        AND $meterName NOT LIKE '%Special%'
-                        AND $meterName NOT LIKE '%Low%'
-                        AND $meterName NOT LIKE '%Burst%'
+                        FROM data 
+                        WHERE $Service 
+                        -- LIKE :redundancy 
+                        -- AND $Service 
+                        LIKE :location 
+                        AND $Service 
+                        LIKE '%Managed Disks%' 
+                        AND $Service 
+                        LIKE :disktype 
+                        AND $Service 
+                        NOT LIKE '%Dev%' 
+                        AND $Service 
+                        NOT LIKE '%Promo%'
+                        AND $Service 
+                        NOT LIKE '%Expired%'  
+                        AND $Service 
+                        NOT LIKE '%Basic%'  
+                        AND $Service 
+                        NOT LIKE '%Snapshots%' 
+                        AND $Service 
+                        NOT LIKE '%Mounts%'
+                        AND $Service 
+                        NOT LIKE '%Special%'
+                        AND $Service 
+                        NOT LIKE '%ZRS%'
+                        AND $Service 
+                        NOT LIKE '%Burst%'
                         ORDER BY Disks ASC ");
-            $disk->bindValue('redundancy', '%' . $redundancy . '%');
-            $disk->bindValue('location', '%' . $region . '%');
-            $disk->bindValue('disktype', '%' . $disktype . '%');
-            $disk->bindValue('dateFilter', '%' . $dateFilter . '%');
+                // $disk->bindValue('redundancy', '%' . $redundancy . '%');
+                $disk->bindValue('location', '%' . $region . '%');
+                $disk->bindValue('disktype', '%' . $disktype . '%');
+            } else {
+                $disk = $pdo->prepare("SELECT *, SUBSTRING_INDEX(SUBSTRING_INDEX($Service, ' - ', 2), ' - ', -1) 
+                        AS `Disks` 
+                        FROM data
+                        WHERE $Service
+                        LIKE :location 
+                        AND $Service 
+                        LIKE '%Managed Disks%'
+                        AND $Service 
+                        LIKE :disktype  
+                        AND $Service
+                        NOT LIKE '%Dev%' 
+                        AND $Service
+                        NOT LIKE '%Promo%'
+                        AND $Service 
+                        NOT LIKE '%Expired%'  
+                        AND $Service 
+                        NOT LIKE '%Basic%'  
+                        AND $Service 
+                        NOT LIKE '%Snapshots%' 
+                        AND $Service
+                        NOT LIKE '%Mounts%'
+                        AND $Service 
+                        NOT LIKE '%Special%'
+                        AND $Service
+                        NOT LIKE '%LRS%' 
+                        AND $Service 
+                        NOT LIKE '%Burst%'
+                        ORDER BY `Disks` ASC ");
+                // $disk->bindValue('redundancy', '%' . $redundancy . '%');
+                $disk->bindValue('location', '%' . $region . '%');
+                $disk->bindValue('disktype', '%' . $disktype . '%');
+            }
+
+
             $disk->execute();
 
             $items = $disk->fetchAll();
@@ -465,8 +539,8 @@ if (!empty($_GET['field'])) {
             header('Content-Type: application/json');
             echo json_encode(array_map(function ($item) {
                 return [
-                    'label' => purify($item['Disks']) . ' (' . diskHeight($item['Disks']) . ')',
-                    'value' => $item['id'] . ' | ' . $item['unitPrice'] . ' | ' . numberExtraction($item['unitOfMeasure']) . ' | ' . $item['Disks']
+                    'label' => $item['Disks'] . ' (' . diskHeight($item['Disks']) . ')',
+                    'value' => $item['id'] . ' | ' . $item['Unit Price'] . ' | ' . numberExtraction($item['Unit of Measure']) . ' | ' . $item['Disks']
                 ];
             }, $items));
             break;
