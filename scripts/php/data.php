@@ -14,7 +14,9 @@ $id = 'accId';
 
 $winLic = "1.25";
 $linLic = "2";
-$dateFilter = date("Y") . date("m");
+// $dateFilter = date("Y") . date("m");
+
+$dateFilter = 202211;
 
 $currencyCode = "currencyCode";
 $tierMinimumUnits = "tierMinimumUnits";
